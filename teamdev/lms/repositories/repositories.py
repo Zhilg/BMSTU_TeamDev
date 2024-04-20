@@ -171,3 +171,4 @@ class SolutionsRepository(BaseRep):
         instance.grade = form['grade']
         instance.save()
         return instance
+ 
