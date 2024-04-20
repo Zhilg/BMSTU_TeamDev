@@ -38,3 +38,11 @@ class TaskPacks(models.Model):
     maxgrade = models.IntegerField()
     mingrade = models.IntegerField()
     duetime = models.DateField()
+    
+class Solutions(models.Model):
+    student = models.ForeignKey(UserProfiles, on_delete=models.CASCADE, related_name='student_solutions')
+    teacher = models.ForeignKey(UserProfiles, on_delete=models.CASCADE, related_name='teacher_solutions')
+    taskpack = models.ForeignKey(TaskPacks, on_delete=models.CASCADE)
+    grade = models.IntegerField(default=-1)
+    filename = models.CharField(max_length=100)
+    sendtime = models.DateField(auto_now=True)
