@@ -30,3 +30,11 @@ class UserProfiles(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return self.is_staff
+    
+class TaskPacks(models.Model):
+    tasks = models.ManyToManyField(Tasks)
+    student = models.ForeignKey(UserProfiles, on_delete=models.CASCADE, related_name='student_taskpacks')
+    teacher = models.ForeignKey(UserProfiles, on_delete=models.CASCADE, related_name='teacher_taskpacks')
+    maxgrade = models.IntegerField()
+    mingrade = models.IntegerField()
+    duetime = models.DateField()
