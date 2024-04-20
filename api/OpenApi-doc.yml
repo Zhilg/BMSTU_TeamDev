@@ -1,0 +1,834 @@
+openapi: "3.0.3"
+info:
+  title: LMS
+  version: "1.0"
+servers:
+  - url: http://127.0.0.1:8000/api/v1
+tags:
+  - name: auth
+  - name: UserProfiles
+  - name: Tasks
+  - name: TaskPacks
+  - name: Solutions
+paths:
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: Login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - login
+                - password
+              properties:
+                login:
+                  type: string
+                  format: email
+                  example: "email@domain.com"
+                password:
+                  type: string
+                  format: password
+                  example: "password1"
+      responses:
+        200:
+          description: Successful operation
+        400:
+          description: Bad request
+        401:
+          description: Invalid login or password
+        500:
+          description: Failed
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: Register
+      description: Register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - name
+                - group
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "login"
+                password:
+                  type: string
+                  format: password
+                  example: "password"
+                name:
+                  type: string
+                  example: "Putin V. V."
+                group:
+                  type: string
+                  example: "IU7-71B"
+      responses:
+        200:
+          description: Successful operation
+        400:
+          description: Bad request
+        500:
+          description: Failed
+  /auth/logout:
+    delete:
+      tags:
+        - auth
+      summary: Logout
+      responses:
+        204:
+          description: Successful operation
+
+  /userprofiles:
+    post:
+      tags:
+        - UserProfiles
+      summary: Create user profile
+      operationId: storeUserProfile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - username
+                - grup
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "login@domain.com"
+                password:
+                  type: string
+                  format: password
+                  example: "password"
+                username:
+                  type: string
+                  example: "Putin V. V."
+                grup:
+                  type: string
+                  example: "IU7-71B"
+      responses:
+        201:
+          description: Successful operation
+          headers:
+            Location:
+              description: URI of created user
+              schema:
+                type: string
+                format: URI
+                example: http://localhost:8080/api/v1/users/1
+        500:
+          description: Failed
+
+    get:
+      tags:
+        - UserProfiles
+      summary: Get all users
+      operationId: indexUser
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                      minimum: 1
+                      example: 1
+                    email:
+                      type: string
+                      example: "email@domain.com"
+                    username:
+                      type: string
+                      example: "Putin V. V."
+                    grup:
+                      type: string
+                      example: "IU7-71B"
+                    isStaff:
+                      type: boolean
+                      example: true
+        400:
+          description: Bad request
+        500:
+          description: Failed
+  /userprofiles/{id}:
+    get:
+      tags:
+        - UserProfiles
+      summary: Get user
+      operationId: showUser
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    minimum: 1
+                    example: 1
+                  email:
+                    type: string
+                    example: "email@domain.com"
+                  username:
+                    type: string
+                    example: "Putin V. V."
+                  grup:
+                    type: string
+                    example: "IU7-71B"
+                  isStaff:
+                    type: boolean
+                    example: true
+        400:
+          description: Bad request
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    put:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - UserProfiles
+      summary: Update user
+      operationId: updateUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - name
+                - group
+                - isStaff
+              properties:
+                email:
+                  type: string
+                  example: "login"
+                password:
+                  type: string
+                  format: password
+                  example: "password"
+                name:
+                  type: string
+                  example: "Putin V. V."
+                group:
+                  type: string
+                  example: "IU7-71B"
+                isStaff:
+                  type: boolean
+                  example: true
+      responses:
+        204:
+          description: Successful operation
+        400:
+          description: Bad request
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    delete:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - UserProfiles
+      summary: Delete user profile
+      operationId: deleteUser
+      responses:
+        204:
+          description: Successful operation
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    patch:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - UserProfiles
+      summary: Update credentials
+      operationId: patchUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - name
+                - group
+                - isStaff
+              properties:
+                email:
+                  type: string
+                  example: "login"
+                password:
+                  type: string
+                  format: password
+                  example: "password"
+                name:
+                  type: string
+                  example: "Putin V. V."
+                group:
+                  type: string
+                  example: "IU7-71B"
+                isStaff:
+                  type: boolean
+                  example: true
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                    example: "login"
+                  password:
+                    type: string
+                    format: password
+                    example: "password"
+                  name:
+                    type: string
+                    example: "Putin V. V."
+                  group:
+                    type: string
+                    example: "IU7-71B"
+                  isStaff:
+                    type: boolean
+                    example: true
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    parameters:
+      - in: path
+        name: id
+        description: ID of user
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+  /tasks:
+    post:
+      tags:
+        - Tasks
+      summary: Create task
+      operationId: storeTask
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  example: "MathematicsIntegration01.txt"
+      responses:
+        201:
+          description: Successful operation
+          headers:
+            Location:
+              description: URI of created task
+              schema:
+                type: string
+                format: URI
+                example: http://localhost:8080/api/v1/tasks/1
+        500:
+          description: Failed
+    get:
+      tags:
+        - Tasks
+      summary: Get all tasks
+      operationId: indexTask
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                      minimum: 1
+                      example: 1
+                    file:
+                      type: string
+                      example: "MathematicsIntegrals01.txt"
+        400:
+          description: Bad request
+        500:
+          description: Failed
+  /tasks/{id}:
+    get:
+      tags:
+        - Tasks
+      summary: Get task
+      operationId: showTask
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    minimum: 1
+                    example: 1
+                  file:
+                    type: string
+                    example: "MathematicsIntegrals01.txt"
+        400:
+          description: Bad request
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    delete:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Tasks
+      summary: Delete task
+      operationId: deleteTask
+      responses:
+        204:
+          description: Successful operation
+        404:
+          description: Not found
+        500:
+          description: Failed
+    parameters:
+      - in: path
+        name: id
+        description: ID of solution
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+
+  /taskpacks:
+    post:
+      tags:
+        - TaskPacks
+      summary: Create taskpack
+      operationId: storeTaskPack
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - n
+                - duetime
+                - theme
+                - group
+                - maxgrade
+                - mingrade
+              properties:
+                n:
+                  type: integer
+                  format: int64
+                  minimum: 1
+                  example: 1
+                duetime:
+                  type: string
+                  format: datetime
+                  example: "29/03/2023"
+                theme:
+                  type: string
+                  example: "Mathematics"
+                group:
+                  type: string
+                  example: "IU7-71B"
+                maxgrade:
+                  type: integer
+                  format: int64
+                  minimum: 1
+                  example: 10
+                mingrade:
+                  type: integer
+                  format: int64
+                  minimum: 1
+                  example: 0
+      responses:
+        201:
+          description: Successful operation
+          headers:
+            Location:
+              description: URI of created taskpack
+              schema:
+                type: string
+                format: URI
+                example: http://localhost:8080/api/v1/taskpacks/1
+        500:
+          description: Failed
+
+    get:
+      tags:
+        - TaskPacks
+      summary: Get all taskpacks
+      operationId: indexTaskPack
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                      minimum: 1
+                      example: 1
+                    n:
+                      type: integer
+                      format: int64
+                      minimum: 1
+                      example: 1
+                    duetime:
+                      type: string
+                      format: datetime
+                      example: "29/03/2023"
+                    theme:
+                      type: string
+                      example: "Mathematics"
+                    group:
+                      type: string
+                      example: "IU7-71B"
+                    maxgrade:
+                      type: integer
+                      format: int64
+                      minimum: 1
+                      example: 10
+                    mingrade:
+                      type: integer
+                      format: int64
+                      minimum: 1
+                      example: 1
+        400:
+          description: Bad request
+        500:
+          description: Failed
+  /taskpacks/{id}:
+    get:
+      tags:
+        - TaskPacks
+      summary: Get taskpack
+      operationId: showTaskPack
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    minimum: 1
+                    example: 1
+                  n:
+                    type: integer
+                    format: int64
+                    minimum: 1
+                    example: 1
+                  duetime:
+                    type: string
+                    format: datetime
+                    example: "29/03/2023"
+                  theme:
+                    type: string
+                    example: "Mathematics"
+                  group:
+                    type: string
+                    example: "IU7-71B"
+                  maxgrade:
+                    type: integer
+                    format: int64
+                    minimum: 1
+                    example: 10
+                  mingrade:
+                    type: integer
+                    format: int64
+                    minimum: 1
+                    example: 0
+        400:
+          description: Bad request
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    delete:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - TaskPacks
+      summary: Delete taskpack
+      operationId: deleteTaskPack
+      responses:
+        204:
+          description: Successful operation
+        404:
+          description: Not found
+        500:
+          description: Failed
+    parameters:
+    - in: path
+      name: id
+      description: ID of solution
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+
+  /solutions:
+    post:
+      tags:
+        - Solutions
+      summary: Create solution
+      operationId: storeSolution
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - taskpackid
+                - file
+                - sendtime
+              properties:
+                taskpackid:
+                    type: integer
+                    format: int64
+                    minimum: 1
+                    example: 1
+                file:
+                  type: string
+                  example: "MI01.txt"
+                sendtime:
+                  type: string
+                  format: datetime
+                  example: "29/03/2023"
+      responses:
+        201:
+          description: Successful operation
+          headers:
+            Location:
+              description: URI of created user
+              schema:
+                type: string
+                format: URI
+                example: http://localhost:8080/api/v1/solutions/1
+        500:
+          description: Failed
+
+    get:
+      tags:
+        - Solutions
+      summary: Get all solutions
+      operationId: indexSolutions
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    taskpackid:
+                      type: integer
+                      format: int64
+                      minimum: 1
+                      example: 1
+                    file:
+                      type: string
+                      example: "MI01.txt"
+                    sendtime:
+                      type: string
+                      format: datetime
+                      example: "29/03/2023"
+                    grade:
+                      type: integer
+                      format: int64
+                      example: 1
+        400:
+          description: Bad request
+        500:
+          description: Failed
+  /solutions/{id}:
+    get:
+      tags:
+        - Solutions
+      summary: Get solution
+      operationId: showSolution
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    minimum: 1
+                    example: 1
+                  taskpackid:
+                    type: integer
+                    format: int64
+                    minimum: 1
+                    example: 1
+                  file:
+                    type: string
+                    example: "MI01.txt"
+                  sendtime:
+                    type: string
+                    format: datetime
+                    example: "29/03/2023"
+                  grade:
+                    type: integer
+                    format: int64
+                    example: 1
+        400:
+          description: Bad request
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    delete:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Solutions
+      summary: Delete solution
+      operationId: deleteSolution
+      responses:
+        204:
+          description: Successful operation
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    patch:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Solutions
+      summary: Update solution
+      operationId: patchSolution
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - taskpackid
+                - grade
+              properties:
+                taskpackid:
+                  type: integer
+                  format: int64
+                  minimum: 1
+                  example: 1
+                grade:
+                  type: integer
+                  format: int64
+                  minimum: 1
+                  example: 1
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    minimum: 1
+                    example: 1
+                  taskpackid:
+                    type: integer
+                    format: int64
+                    minimum: 1
+                    example: 1
+                  file:
+                    type: string
+                    example: "MI01.txt"
+                  sendtime:
+                    type: string
+                    format: datetime
+                    example: "29/03/2023"
+                  grade:
+                    type: integer
+                    format: int64
+                    example: 1
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    parameters:
+      - in: path
+        name: id
+        description: ID of solution
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
