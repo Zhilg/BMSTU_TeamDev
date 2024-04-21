@@ -40,3 +40,17 @@ jobs:
         cd teamdev
         python manage.py migrate
   
+    - name: Run solution tests
+      run: |
+        cd teamdev
+        python manage.py test lms.tests.solutions_tests
+  
+    - name: Run taskpacks tests
+      run: |
+        cd teamdev
+        python manage.py test lms.tests.taskpacks_tests
+          
+    - name: Run userprofiles tests
+      run: |
+        cd teamdev
+        python manage.py test lms.tests.userprofiles_tests
