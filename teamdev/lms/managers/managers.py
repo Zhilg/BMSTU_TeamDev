@@ -85,3 +85,29 @@ class TasksManager(BaseManag, models.Model):
     def delete(self, filename):
         file = self.rep.get(filename)
         file.delete()
+
+
+class TaskPacksManager(BaseManag, models.Model):
+    def __init__(self):
+        super().__init__()
+
+    def create(self, form, user):
+        return self.rep.insert(form, user)
+
+    def get(self, user=None, id=None):
+        if id:
+            return self.rep.get(id=id)
+        if not user:
+            return self.rep.get()
+        if user.grup == 'Teacher':
+            TASKPACKS_QUERY = self.rep.get(teacher=user.id)
+        else:
+            TASKPACKS_QUERY = self.rep.get(student=user.id)
+        return TASKPACKS_QUERY
+
+    def unpack_fields_values(self, user):
+        TASKPACKS_QUERY = self.get(user)
+        return [list(i.values()) for i in TASKPACKS_QUERY]
+
+    def get_meta_fields(self):
+        return [f.name for f in self.rep.model._meta.get_fields()[1:-1]]
