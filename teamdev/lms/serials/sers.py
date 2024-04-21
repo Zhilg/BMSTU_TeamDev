@@ -23,6 +23,8 @@ class UserAuthSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return attrs
+    
+    
 
 class UserProfilesSerializer(serializers.ModelSerializer):
     old_password = serializers.CharField(max_length=80, write_only=True)
