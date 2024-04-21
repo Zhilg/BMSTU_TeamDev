@@ -111,3 +111,32 @@ class TaskPacksManager(BaseManag, models.Model):
 
     def get_meta_fields(self):
         return [f.name for f in self.rep.model._meta.get_fields()[1:-1]]
+
+
+class SolutionsManager(BaseManag, models.Model):
+    def __init__(self):
+        super().__init__()
+
+    def create(self, user, form):
+        return self.rep.insert(form, user)
+
+    def update(self, form, instance):
+        return self.rep.update(form, instance)
+
+    def get(self, user=None, id=None):
+        if id:
+            return self.rep.get(id=id)
+        if user:
+            if user.grup == 'Teacher':
+                SOLUTIONS_QUERY = self.rep.get(teacher=user.id)
+            else:
+                SOLUTIONS_QUERY = self.rep.get(student=user.id)
+            return SOLUTIONS_QUERY
+        return self.rep.get()
+
+    def get_meta_fields(self):
+        return [f.name for f in self.rep.model._meta.get_fields()]
+
+    def unpack_fields_values(self, user):
+        query = self.get(user)
+        return [list(i.values()) for i in query]
