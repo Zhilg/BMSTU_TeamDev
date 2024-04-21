@@ -1,33 +1,25 @@
+"""
+URL configuration for teamdev project.
+
+The `urlpatterns` list routes URLs to views. For more information please see:
+    https://docs.djangoproject.com/en/4.2/topics/http/urls/
+Examples:
+Function views
+    1. Add an import:  from my_app import views
+    2. Add a URL to urlpatterns:  path('', views.home, name='home')
+Class-based views
+    1. Add an import:  from other_app.views import Home
+    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
+Including another URLconf
+    1. Import the include() function: from django.urls import include, path
+    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+"""
+from django.contrib import admin
+from django.contrib.auth import views as auth_views
 from django.urls import path, include
 
-from lms.views import views
-from drf_spectacular.views import SpectacularAPIView
-from drf_yasg import openapi
-from drf_yasg.views import get_schema_view
-
-schema_view = get_schema_view(
-    openapi.Info(
-        title="LMS",
-        default_version="v1",
-        description="BMSTU_WEB COURSE",
-        
-    ),
-    public=True
-)
-
 urlpatterns = [
-    path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path("auth/register", views.UserRegisterView.as_view(), name='register'),
-    path("auth/login", views.UserLoginView.as_view(), name="login"),
-    path('auth/logout', views.LogoutView.as_view(), name='logout_view'),
-    
-    path("userprofiles", views.UserProfilesView.as_view(), name='list_users'),
-    path("userprofiles/<int:id>", views.SingleUserView.as_view()),
-    path("tasks", views.TasksView.as_view()),
-    path("tasks/<int:id>", views.SingleTaskView.as_view()),
-    path("taskpacks", views.TaskPacksView.as_view()),
-    path("taskpacks/<int:id>", views.SingleTaskPackView.as_view()),
-    path("solutions", views.SolutionsView.as_view()),
-    path("solutions/<int:id>", views.SingleSolutionView.as_view()),
+    path('admin/', admin.site.urls),
+    path('', include('lms.urls')),
     
 ]
