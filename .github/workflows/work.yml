@@ -37,6 +37,6 @@ jobs:
   
     - name: Run database migrations
       run: |
-        cd bd_course
+        cd teamdev
         python manage.py migrate
   
