@@ -66,3 +66,22 @@ class UserProfilesManager(BaseUserManag, BaseUserManager):
 
     def change_password(self, instance, validated_data):
         return self.rep.update_password(instance, validated_data)
+
+
+class TasksManager(BaseManag, models.Model):
+    def __init__(self):
+        super().__init__()
+
+    def create(self, form):
+        query = self.rep.get(form['filename'])
+        if query.__len__():
+            raise FileAlreadyExists
+        return self.rep.insert(form)
+
+    def get(self, filename=None, id=None):
+        query = self.rep.get(filename, id)
+        return query
+
+    def delete(self, filename):
+        file = self.rep.get(filename)
+        file.delete()
