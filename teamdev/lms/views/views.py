@@ -269,3 +269,227 @@ class SingleSolutionView(APIView):
             serializer.update()
             return Response(serializer.validated_data, status=status.HTTP_204_NO_CONTENT)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserLoginView(APIView):
+    @swagger_auto_schema(responses={201: "created", 400:"bad request", 401:"invalid login or password", 500:'failed'},
+                        request_body=openapi.Schema
+                        (
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                "email":openapi.Schema(
+                                    type=openapi.TYPE_STRING,
+                                    example='email@domain.com'
+                                ),
+                                "password":openapi.Schema(
+                                    type=openapi.TYPE_STRING,
+                                    example='password'
+                                )
+                            },
+                            required=['email', 'password']
+                        ))
+    def post(self, request):        
+        serializer = UserAuthSerializer(data=request.data, context={"request":request})
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            return Response({'message': 'Успешный вход в систему.'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+class UserRegisterView(APIView):
+    @swagger_auto_schema(responses={201: "created", 400:"bad request", 500:'failed'},
+                        request_body=openapi.Schema
+                        (
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                "email":openapi.Schema(
+                                    type=openapi.TYPE_STRING,
+                                    example='email100@domain.com'
+                                ),
+                                "password":openapi.Schema(
+                                    type=openapi.TYPE_STRING,
+                                    example='password'
+                                ),
+                                "username" : openapi.Schema(
+                                    type=openapi.TYPE_STRING,
+                                    example='V.V.Putin'
+                                ),
+                                "grup" : openapi.Schema(
+                                    type=openapi.TYPE_STRING,
+                                    example='IU7-71B'
+                                )
+                            },
+                            required=['email', 'password', "username", "grup"]
+                        ))
+    def post(self, request):
+        
+        serializer = UserProfilesSerializer(data=request.data, partial=True)
+        if serializer.is_valid():
+            user_profile = serializer.save()
+            response_data = {'message': 'Successful operation'}
+            response_headers = {'Location': f'http://localhost:8000/api/v1/users/{user_profile.id}'}
+            return Response(status=status.HTTP_201_CREATED, data=response_data, headers=response_headers)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class LogoutView(APIView):
+    @swagger_auto_schema(responses={204: "successfull operation", 401:"unauthorized"})
+    def delete(self, request):
+        if not request.user.is_authenticated:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        logout(request)
+        return OK
+
+class UserProfilesView(APIView):
+    @swagger_auto_schema(responses={200: "success", 400:"bad request", 401:"unauthorized", 500:'failed'})
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        user_profiles = UPM.get()
+        serializer = UserProfilesSerializer(user_profiles, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @swagger_auto_schema(responses={201: "created", 400:"bad request", 401:"unauthorized", 403:"forbidden", 500:'failed'},
+                        request_body=openapi.Schema
+                        (
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                "email":openapi.Schema(
+                                    type=openapi.TYPE_STRING,
+                                    example='email100@domain.com'
+                                ),
+                                "password":openapi.Schema(
+                                    type=openapi.TYPE_STRING,
+                                    example='password'
+                                ),
+                                "username" : openapi.Schema(
+                                    type=openapi.TYPE_STRING,
+                                    example='V.V.Putin'
+                                ),
+                                "grup" : openapi.Schema(
+                                    type=openapi.TYPE_STRING,
+                                    example='IU7-71B'
+                                )
+                            },
+                            required=['email', 'password', "username", "grup"]
+                        ))
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        if request.user.is_staff == False:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        serializer = UserProfilesSerializer(data=request.data, partial=True)
+        if serializer.is_valid():
+            user_profile = serializer.save()
+            response_data = {'message': 'Successful operation'}
+            response_headers = {'Location': f'http://localhost:8000/api/v1/users/{user_profile.id}'}
+            return Response(status=status.HTTP_201_CREATED, data=response_data, headers=response_headers)
+
+        return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
+
+class SingleUserView(APIView):
+    @swagger_auto_schema(responses={200: "success", 400:"bad request", 401:"unauthorized",404:"Not found", 500:'failed'})
+    def get(self, request, id=None):
+        if not request.user.is_authenticated:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        if id is None or id < 0:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user_profile = UPM.get(id)
+        if not user_profile:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = UserProfilesSerializer(user_profile[0])
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+    
+    @swagger_auto_schema(responses={201: "created", 400:"bad request", 401:"unauthorized", 403:"Not permitted", 500:'failed'},
+                        request_body=openapi.Schema
+                        (
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                "email":openapi.Schema(
+                                    type=openapi.TYPE_STRING,
+                                    example='email100@domain.com'
+                                ),
+                                "password":openapi.Schema(
+                                    type=openapi.TYPE_STRING,
+                                    example='password'
+                                ),
+                                "username" : openapi.Schema(
+                                    type=openapi.TYPE_STRING,
+                                    example='V.V.Putin'
+                                ),
+                                "grup" : openapi.Schema(
+                                    type=openapi.TYPE_STRING,
+                                    example='IU7-71B'
+                                ),
+                                "is_staff" : openapi.Schema(
+                                    type=openapi.TYPE_BOOLEAN,
+                                    example=False
+                                )
+                            },
+                            required=['email', 'password', "name", "group", "is_staff"]
+                        ))
+    def put(self, request, id=None):
+        if not request.user.is_authenticated:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        if not request.user.is_staff and request.user.id != id:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        
+        if id is None or id < 0:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user_profile = UPM.get(id=id)[0]
+        if not user_profile:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = UserProfilesSerializer(instance=user_profile,data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.update()
+            return Response(serializer.validated_data, status=status.HTTP_204_NO_CONTENT)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+    @swagger_auto_schema(responses={204: "success", 401:"unauthorized", 403:"Not permitted", 404:"Not found", 500:'failed'})
+    
+    def delete(self, request, id=None):
+        if not request.user.is_authenticated:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        if not request.user.is_staff and request.user.id != id:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        if id is None or id < 0:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user_profile = UPM.get(id=id)
+        if user_profile is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        user_profile.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    @swagger_auto_schema(responses={201: "created", 400:"bad request", 401:"unauthorized", 403:"Not permitted", 500:'failed'},
+                        request_body=openapi.Schema
+                        (
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                "old_password":openapi.Schema(
+                                    type=openapi.TYPE_STRING,
+                                    example='password'
+                                ),
+                                "password":openapi.Schema(
+                                    type=openapi.TYPE_STRING,
+                                    example='password1'
+                                )
+                            },
+                            required=["old_password", "new_password"]
+                        ))
+    
+    def patch(self, request, id=None):
+        if not request.user.is_authenticated:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        if not request.user.is_staff and request.user.id != id:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        if id is None or id < 0:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user_profile = UPM.get(id=id)[0]
+        if not user_profile:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = UserProfilesSerializer(user_profile, data=request.data, partial=True)
+        if serializer.is_valid():
+
+            serializer.password_update()
+            return Response(serializer.validated_data, status=status.HTTP_204_NO_CONTENT)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
