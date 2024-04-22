@@ -295,6 +295,7 @@ class UserLoginView(APIView):
             return Response({'message': 'Успешный вход в систему.'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
+        
 class UserRegisterView(APIView):
     @swagger_auto_schema(responses={201: "created", 400:"bad request", 500:'failed'},
                         request_body=openapi.Schema
