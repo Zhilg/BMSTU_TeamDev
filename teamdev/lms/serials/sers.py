@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from lms.models.models import UserProfiles
 from django.contrib.auth import logout, login
-from lms.backends import EmailBackend
 from lms.boot import *
 
 class UserAuthSerializer(serializers.Serializer):

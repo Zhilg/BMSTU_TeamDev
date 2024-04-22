@@ -1,4 +1,4 @@
-from bd_course.BaseRepFactory import BaseRepFactory
+from teamdev.BaseRepFactory import BaseRepFactory
 from lms.repositories.repositories import *
 
 class PgRepFactory(BaseRepFactory):
