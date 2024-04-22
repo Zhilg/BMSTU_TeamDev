@@ -9,6 +9,10 @@ class Tasks(models.Model):
     theme = models.CharField(max_length=100)
 
 class UserProfiles(AbstractBaseUser):
+    '''
+    Класс UserProfiles является моделью пользователя, представляющей пользовательский профиль в системе.
+    Он наследует от AbstractBaseUser, что позволяет определить собственную модель пользователя.
+    '''
     last_login = models.DateTimeField(auto_now=True)
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=100)
@@ -32,6 +36,10 @@ class UserProfiles(AbstractBaseUser):
         return self.is_staff
     
 class TaskPacks(models.Model):
+    '''
+    Класс TaskPacks является моделью комплекта задач, представляющей комплект задач в системе.
+    Он наследует от AbstractBaseUser, что позволяет определить собственную модель комплекта задач.
+    '''
     tasks = models.ManyToManyField(Tasks)
     student = models.ForeignKey(UserProfiles, on_delete=models.CASCADE, related_name='student_taskpacks')
     teacher = models.ForeignKey(UserProfiles, on_delete=models.CASCADE, related_name='teacher_taskpacks')
@@ -40,6 +48,10 @@ class TaskPacks(models.Model):
     duetime = models.DateField()
     
 class Solutions(models.Model):
+    '''
+    Класс Solutions является моделью решений, представляющей решение в системе.
+    Он наследует от AbstractBaseUser, что позволяет определить собственную модель решений.
+    '''
     student = models.ForeignKey(UserProfiles, on_delete=models.CASCADE, related_name='student_solutions')
     teacher = models.ForeignKey(UserProfiles, on_delete=models.CASCADE, related_name='teacher_solutions')
     taskpack = models.ForeignKey(TaskPacks, on_delete=models.CASCADE)
