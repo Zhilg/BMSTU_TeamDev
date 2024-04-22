@@ -20,7 +20,23 @@ from lms.serials.sers import UserProfilesSerializer, UserAuthSerializer, TasksSe
 from lms.boot import *
 
 class TasksView(APIView):
-    # permission_classes
+    '''
+    Класс TasksView представляет собой API для работы с задачами.
+    Он содержит два метода: post для создания новой задачи и get для получения списка всех задач.
+
+    Метод post:
+    - Проверяет, авторизован ли пользователь. Если нет, возвращает статус 401 UNAUTHORIZED.
+    - Проверяет, является ли пользователь персоналом или принадлежит ли к группе "Teacher". Если нет, возвращает статус 403 FORBIDDEN.
+    - Принимает данные о задаче в формате JSON: filename (имя файла) и theme (тема задачи).
+    - Сохраняет задачу с помощью сериализатора TasksSerializer.
+    - Возвращает успешный ответ с кодом 201 CREATED, сообщением "Successful operation" и заголовком Location, указывающим на URL созданной задачи.
+
+    Метод get:
+    - Проверяет, авторизован ли пользователь. Если нет, возвращает статус 401 UNAUTHORIZED.
+    - Получает список всех задач с помощью метода TM.get().
+    - Сериализует список задач с помощью TasksSerializer.
+    - Возвращает список задач в формате JSON с кодом 200 OK.
+    '''
     @swagger_auto_schema(responses={201: "created", 401:"unauthorized", 403:"Not permitted", 500:'failed'},
                     request_body=openapi.Schema
                     (
@@ -61,6 +77,25 @@ class TasksView(APIView):
 
 
 class TaskPacksView(APIView):
+    '''
+    Класс TaskPacksView представляет собой API для работы с комплектами задач.
+    Он содержит два метода: post для создания нового комплекта задач и get для получения списка всех комплектов.
+
+    Метод post:
+    - Проверяет, авторизован ли пользователь. Если нет, возвращает статус 401 UNAUTHORIZED.
+    - Проверяет, является ли пользователь персоналом или принадлежит ли к группе "Teacher". Если нет, возвращает статус 403 FORBIDDEN.
+    - Принимает данные о комплекте задач в формате JSON: n (количество задач), duetime (дата дедлайна),
+    theme (тема комплекта), group (группа), maxgrade (максимальная оценка), mingrade (минимальная оценка).
+    - Сохраняет комплект задач с помощью сериализатора TaskPacksSerializer.
+    - Возвращает успешный ответ с кодом 201 CREATED и сообщением "Successful operation". О
+    брабатывает возможные исключения и возвращает соответствующие сообщения об ошибке.
+
+    Метод get:
+    - Проверяет, авторизован ли пользователь. Если нет, возвращает статус 401 UNAUTHORIZED.
+    - Получает список всех комплектов задач с помощью метода TPM.get().
+    - Сериализует список комплектов задач с помощью TaskPacksModelSerializer.
+    - Возвращает список комплектов задач в формате JSON с кодом 200 OK.
+    '''
     @swagger_auto_schema(
         responses={201: "created", 400: "bad request", 401: "unauthorized", 403: "Not permitted", 500: 'failed'},
         request_body=openapi.Schema
@@ -137,6 +172,25 @@ class TaskPacksView(APIView):
 
 
 class SingleTaskPackView(APIView):
+    '''
+    Класс SingleTaskPackView представляет собой API для работы с отдельным комплектом задач по его идентификатору (id).
+    Он содержит два метода: get для получения информации о комплекте задач и delete для удаления комплекта задач.
+
+    Метод get:
+    - Проверяет, авторизован ли пользователь. Если нет, возвращает статус 401 UNAUTHORIZED.
+    - Проверяет, передан ли корректный идентификатор комплекта задач. Если нет, возвращает статус 400 BAD REQUEST.
+    - Получает комплект задач по указанному идентификатору с помощью метода TPM.get(id=id).
+    - Если комплект задач не найден, возвращает статус 404 NOT FOUND.
+    - Сериализует информацию о комплекте задач с помощью TaskPacksModelSerializer и возвращает её в формате JSON с кодом 200 OK.
+
+    Метод delete:
+    - Проверяет, авторизован ли пользователь. Если нет, возвращает статус 401 UNAUTHORIZED.
+    - Проверяет, является ли пользователь персоналом или принадлежит ли к группе "Teacher". Если нет, возвращает статус 403 FORBIDDEN.
+    - Проверяет, передан ли корректный идентификатор комплекта задач. Если нет, возвращает статус 400 BAD REQUEST.
+    - Получает комплект задач по указанному идентификатору с помощью метода TPM.get(id=id).
+    - Если комплект задач не найден, возвращает статус 404 NOT FOUND.
+    - Удаляет комплект задач и возвращает статус 204 NO CONTENT.
+    '''
     @swagger_auto_schema(responses={200: "success", 401: "unauthorized", 404: "Not found", 500: 'failed'})
     def get(self, request, id):
         if not request.user.is_authenticated:
@@ -166,6 +220,24 @@ class SingleTaskPackView(APIView):
 
 
 class SolutionsView(APIView):
+    '''
+    Класс SolutionsView представляет собой API для работы с решениями задач.
+    Он содержит два метода: post для создания нового решения и get для получения списка всех решений.
+
+    Метод post:
+    - Проверяет, авторизован ли пользователь. Если нет, возвращает статус 401 UNAUTHORIZED.
+    - Принимает данные запроса, включающие идентификатор комплекта задач (taskpackid) и название файла (filename).
+    - Создает сериализатор SolutionsSerializer с переданными данными и контекстом пользователя.
+    - Если данные валидны, сохраняет решение и возвращает сообщение об успешной операции с кодом 201 CREATED.
+    - Если файл с таким названием уже существует, возвращает статус 400 BAD REQUEST.
+    - Если указанный комплект задач не существует, возвращает статус 404 NOT FOUND.
+    - Если комплект задач не принадлежит пользователю, возвращает статус 400 BAD REQUEST.
+
+    Метод get:
+    - Проверяет, авторизован ли пользователь. Если нет, возвращает статус 401 UNAUTHORIZED.
+    - Получает список всех решений задач с помощью метода SM.get().
+    - Сериализует список решений с помощью SolutionsModelSerializer и возвращает его в формате JSON с кодом 200 OK.
+    '''
     @swagger_auto_schema(responses={201: "created", 400: "bad request", 401: "unauthorized", 500: 'failed'},
                          request_body=openapi.Schema
                              (
@@ -217,6 +289,36 @@ class SolutionsView(APIView):
 
 
 class SingleSolutionView(APIView):
+    '''
+    Класс SingleSolutionView представляет собой APIView для работы с отдельным решением задачи.
+    Он содержит три метода: get для получения конкретного решения, delete для удаления решения и patch для обновления информации о решении.
+
+    Метод get:
+    - Проверяет, авторизован ли пользователь. Если нет, возвращает статус 401 UNAUTHORIZED.
+    - Принимает идентификатор решения (id) в качестве параметра.
+    - Если id не передан или меньше нуля, возвращает статус 400 BAD REQUEST.
+    - Получает решение по указанному id с помощью метода SM.get().
+    - Если решение не найдено, возвращает статус 404 NOT FOUND.
+    - Сериализует найденное решение с помощью SolutionsModelSerializer и возвращает его в формате JSON с кодом 200 OK.
+
+    Метод delete:
+    - Проверяет, авторизован ли пользователь. Если нет, возвращает статус 401 UNAUTHORIZED.
+    - Принимает идентификатор решения (id) в качестве параметра.
+    - Если id не передан или меньше нуля, возвращает статус 400 BAD REQUEST.
+    - Получает решение по указанному id с помощью метода SM.get().
+    - Если решение не найдено, возвращает статус 404 NOT FOUND.
+    - Удаляет найденное решение и возвращает статус 204 NO CONTENT.
+
+    Метод patch:
+    - Проверяет, авторизован ли пользователь. Если нет, возвращает статус 401 UNAUTHORIZED.
+    - Проверяет, является ли пользователь учеником или преподавателем. Если нет, возвращает статус 403 FORBIDDEN.
+    - Принимает идентификатор решения (id) в качестве параметра.
+    - Если id не передан или меньше нуля, возвращает статус 400 BAD REQUEST.
+    - Получает решение по указанному id с помощью метода SM.get().
+    - Если решение не найдено, возвращает статус 404 NOT FOUND.
+    - Обновляет информацию о решении на основе переданных данных и возвращает обновленное решение с кодом 204 NO CONTENT в случае успешного обновления.
+    - В случае невалидных данных возвращает статус 400 BAD REQUEST.
+    '''
     @swagger_auto_schema(responses={200: "success", 401: "unauthorized", 404: "Not found", 500: 'failed'})
     def get(self, request, id):
         if not request.user.is_authenticated:
@@ -274,6 +376,16 @@ class SingleSolutionView(APIView):
 
 
 class UserLoginView(APIView):
+    '''
+    Класс UserLoginView представляет собой API для входа пользователя в систему.
+    Он содержит один метод post для обработки запроса на аутентификацию пользователя.
+
+    Метод post:
+    - Принимает запрос с данными в формате JSON, содержащими email и password.
+    - Проверяет валидность данных с помощью сериализатора UserAuthSerializer.
+    - Если данные валидны, извлекает пользователя из сериализатора и возвращает сообщение "Успешный вход в систему" с кодом 200 OK.
+    - Если данные неверны или не прошли валидацию, возвращает ошибки сериализатора с кодом 400 BAD REQUEST.
+    '''
     @swagger_auto_schema(responses={201: "created", 400:"bad request", 401:"invalid login or password", 500:'failed'},
                         request_body=openapi.Schema
                         (
@@ -299,6 +411,17 @@ class UserLoginView(APIView):
         
         
 class UserRegisterView(APIView):
+    '''
+    Класс UserRegisterView представляет собой API для регистрации нового пользователя в системе.
+    Он содержит один метод post для обработки запроса на создание нового пользователя.
+
+    Метод post:
+    - Принимает запрос с данными в формате JSON, содержащими email, password, username и grup.
+    - Проверяет валидность данных с помощью сериализатора UserProfilesSerializer.
+    - Если данные валидны, создает новый профиль пользователя и возвращает сообщение "Успешная операция" с кодом
+    201 CREATED и заголовок Location с ссылкой на созданный профиль пользователя.
+    - Если данные неверны или не прошли валидацию, возвращает ошибки сериализатора с кодом 400 BAD REQUEST.
+    '''
     @swagger_auto_schema(responses={201: "created", 400:"bad request", 500:'failed'},
                         request_body=openapi.Schema
                         (
@@ -334,6 +457,17 @@ class UserRegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LogoutView(APIView):
+    '''
+    Класс LogoutView представляет собой APIView для выхода пользователя из системы. Он содержит один метод delete для обработки запроса на выход пользователя.
+
+    Метод delete:
+    - Проверяет, аутентифицирован ли текущий пользователь. Если пользователь не аутентифицирован, возвращает ответ с кодом 401 UNAUTHORIZED.
+    - Выполняет выход пользователя из системы с помощью функции logout().
+    - Возвращает успешный ответ с кодом 200 OK.
+
+    Swagger документация:
+    - Метод delete имеет описание возможных ответов: 204 successfull operation, 401 unauthorized.
+    '''
     @swagger_auto_schema(responses={204: "successfull operation", 401:"unauthorized"})
     def delete(self, request):
         if not request.user.is_authenticated:
@@ -342,6 +476,23 @@ class LogoutView(APIView):
         return OK
 
 class UserProfilesView(APIView):
+    '''
+    Класс UserProfilesView представляет собой APIView для работы с профилями пользователей.
+    Он содержит два метода: get для получения списка профилей пользователей и post для создания нового профиля пользователя.
+
+    Метод get:
+    - Проверяет, аутентифицирован ли текущий пользователь. Если пользователь не аутентифицирован, возвращает ответ с кодом 401 UNAUTHORIZED.
+    - Получает список профилей пользователей с помощью UPM.get().
+    - Сериализует данные с помощью UserProfilesSerializer.
+    - Возвращает успешный ответ с кодом 200 OK и данными всех профилей пользователей.
+
+    Метод post:
+    - Проверяет, аутентифицирован ли текущий пользователь. Если пользователь не аутентифицирован, возвращает ответ с кодом 401 UNAUTHORIZED.
+    - Проверяет, является ли текущий пользователь персоналом (staff). Если нет, возвращает ответ с кодом 403 FORBIDDEN.
+    - Сериализует данные запроса с помощью UserProfilesSerializer.
+    - Если данные валидны, сохраняет профиль пользователя и возвращает успешный ответ с кодом 201 CREATED и информацией о созданном профиле.
+    - Если данные невалидны, возвращает ответ с кодом 400 BAD REQUEST и ошибками сериализации.
+    '''
     @swagger_auto_schema(responses={200: "success", 400:"bad request", 401:"unauthorized", 500:'failed'})
     def get(self, request):
         if not request.user.is_authenticated:
@@ -389,6 +540,38 @@ class UserProfilesView(APIView):
         return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
 
 class SingleUserView(APIView):
+    '''Класс SingleUserView представляет собой API для работы с данными отдельного пользователя.
+
+    Метод get используется для получения информации о пользователе по его id. Требуется аутентификация пользователя.
+    Метод put используется для обновления информации о пользователе. Требуется аутентификация пользователя и проверка на права доступа.
+    Метод delete используется для удаления пользователя. Требуется аутентификация пользователя и проверка на права доступа.
+    Метод patch используется для изменения пароля пользователя. Требуется аутентификация пользователя и проверка на права доступа.
+
+
+
+    Метод GET:
+    Описание: Получение информации о пользователе по его id
+    Параметры запроса: id - идентификатор пользователя
+    Успешный ответ: Код 200 и информация о пользователе
+    Ошибки: 400 - неверный запрос, 401 - неавторизованный запрос, 404 - пользователь не найден, 500 - ошибка сервера
+
+    Метод PUT:
+    Описание: Обновление информации о пользователе
+    Параметры запроса: id - идентификатор пользователя
+    Успешный ответ: Код 204 и обновленная информация о пользователе
+    Ошибки: 400 - неверный запрос, 401 - неавторизованный запрос, 403 - запрещено, 500 - ошибка сервера
+    Метод DELETE:
+
+    Описание: Удаление пользователя
+    Параметры запроса: id - идентификатор пользователя
+    Успешный ответ: Код 204
+    Ошибки: 400 - неверный запрос, 401 - неавторизованный запрос, 403 - запрещено, 404 - пользователь не найден, 500 - ошибка сервера
+
+    Метод PATCH:
+    Описание: Изменение пароля пользователя
+    Параметры запроса: id - идентификатор пользователя
+    Успешный ответ: Код 204 и измененный пароль пользователя
+    Ошибки: 400 - неверный запрос, 401 - неавторизованный запрос, 403 - запрещено, 404 - пользователь не найден, 500 - ошибка сервера'''
     @swagger_auto_schema(responses={200: "success", 400:"bad request", 401:"unauthorized",404:"Not found", 500:'failed'})
     def get(self, request, id=None):
         if not request.user.is_authenticated:
@@ -400,7 +583,7 @@ class SingleUserView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = UserProfilesSerializer(user_profile[0])
         return Response(data=serializer.data, status=status.HTTP_200_OK)
-    
+
     @swagger_auto_schema(responses={201: "created", 400:"bad request", 401:"unauthorized", 403:"Not permitted", 500:'failed'},
                         request_body=openapi.Schema
                         (
@@ -434,7 +617,7 @@ class SingleUserView(APIView):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         if not request.user.is_staff and request.user.id != id:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        
+
         if id is None or id < 0:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         user_profile = UPM.get(id=id)[0]
@@ -445,9 +628,9 @@ class SingleUserView(APIView):
             serializer.update()
             return Response(serializer.validated_data, status=status.HTTP_204_NO_CONTENT)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-    
+
     @swagger_auto_schema(responses={204: "success", 401:"unauthorized", 403:"Not permitted", 404:"Not found", 500:'failed'})
-    
+
     def delete(self, request, id=None):
         if not request.user.is_authenticated:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
@@ -461,7 +644,7 @@ class SingleUserView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         user_profile.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
     @swagger_auto_schema(responses={201: "created", 400:"bad request", 401:"unauthorized", 403:"Not permitted", 500:'failed'},
                         request_body=openapi.Schema
                         (
@@ -478,7 +661,7 @@ class SingleUserView(APIView):
                             },
                             required=["old_password", "new_password"]
                         ))
-    
+
     def patch(self, request, id=None):
         if not request.user.is_authenticated:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
@@ -499,6 +682,31 @@ class SingleUserView(APIView):
     
         
 class SingleTaskView(APIView):
+    '''
+    Класс SingleTaskView представляет собой API для работы с отдельным заданием.
+
+    Метод GET:
+    URL: /tasks/{id}/
+    Описание: Получает информацию о задании по его идентификатору.
+    Параметры:
+    id (обязательный): идентификатор задания Ответы:
+    200: успешное выполнение запроса, возвращает данные задания
+    401: пользователь не авторизован
+    403: пользователь не имеет прав доступа
+    404: задание не найдено
+    500: ошибка сервера
+
+    Метод DELETE:
+    URL: /tasks/{id}/
+    Описание: Удаляет задание по его идентификатору.
+    Параметры:
+    id (обязательный): идентификатор задания Ответы:
+    200: успешное выполнение запроса, задание было удалено
+    401: пользователь не авторизован
+    403: пользователь не имеет прав доступа
+    404: задание не найдено
+    500: ошибка сервера
+    '''
     @swagger_auto_schema(responses={200: "success", 401:"unauthorized", 404:"Not found", 500:'failed'})
     def get(self, request, id):
         if not request.user.is_authenticated:
