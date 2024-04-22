@@ -494,3 +494,34 @@ class SingleUserView(APIView):
             return Response(serializer.validated_data, status=status.HTTP_204_NO_CONTENT)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
+    
+        
+class SingleTaskView(APIView):
+    @swagger_auto_schema(responses={200: "success", 401:"unauthorized", 404:"Not found", 500:'failed'})
+    def get(self, request, id):
+        if not request.user.is_authenticated:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        if not request.user.is_staff and not request.user.grup != "Teacher":
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        if id is None or id < 0:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        task = TM.get(id)
+        if not task:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = TasksSerializer(task[0])
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+    
+    @swagger_auto_schema(responses={200: "success",401:"unauthorized", 403:"Not permitted", 404:"Not found", 500:'failed'})
+    def delete(self, request, id):
+        if not request.user.is_authenticated:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        if not request.user.is_staff and not request.user.grup != "Teacher":
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        if id is None or id < 0:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        task = TM.get(id=id)
+        if task is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        task.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+ 
