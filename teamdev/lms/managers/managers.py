@@ -3,6 +3,8 @@ from teamdev.BaseManag import BaseUserManag, BaseManag
 
 from lms.exceptions import *
 from django.contrib.auth.models import BaseUserManager
+from django.contrib.auth import login
+
 
 
 # для менеджеров свои модельки, а репозиторий конвертирует из модели в бд в модель для менеджеров
